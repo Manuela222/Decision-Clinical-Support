@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clinical Decision Support — Prototype</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12h4l2-7 4 14 2-7h8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>Clinical Decision Support</h1>
+        <span class="tagline">AI discharge-medication assistant</span>
+      </div>
+    </div>
+    <nav>
+      <a href="/" class="active">Home</a>
+      <a href="/existing-patient.html">Existing Patient</a>
+      <a href="/new-patient.html">New Patient</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <span class="hero-eyebrow">Baseline · Trained model · Agent</span>
+      <h2>Discharge medication guidance for multimorbid patients</h2>
+      <p>Compares a deterministic baseline, a trained multi-label model, and an LLM agent with
+        retrieval and tool use — always checking chronic hypertension as a safety constraint,
+        never as a treatment target.</p>
+    </section>
+
+    <div class="disclaimer">
+      Prototype discharge-medication decision support built on a MIMIC-III extract. Not for real
+      clinical use. See the project README for data-limitation and synthetic-data disclaimers.
+    </div>
+
+    <div class="home-grid">
+      <div class="card">
+        <h3><span class="card-icon">&#128200;</span> Existing test-set patient</h3>
+        <p>Pick a held-out test patient and compare baseline, trained-model, and agent
+          recommendations against their true discharge medications, side by side.</p>
+        <a href="/existing-patient.html"><button>Open</button></a>
+      </div>
+      <div class="card">
+        <h3><span class="card-icon">&#10024;</span> New patient</h3>
+        <p>Enter (or auto-fill with a synthetic example) a hypothetical patient and run the
+          agent's full reasoning, evidence, and safety trace.</p>
+        <a href="/new-patient.html"><button>Open</button></a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

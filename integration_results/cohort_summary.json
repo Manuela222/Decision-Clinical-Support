@@ -1,0 +1,8 @@
+{
+  "n_admissions": 643,
+  "n_patients": 622,
+  "n_train_admissions": 515,
+  "n_test_admissions": 128,
+  "n_distinct_label_classes_train": 66,
+  "n_distinct_label_classes_test": 61
+}

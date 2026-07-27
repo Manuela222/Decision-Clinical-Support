@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>New Patient — CDS Prototype</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12h4l2-7 4 14 2-7h8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>Clinical Decision Support</h1>
+        <span class="tagline">AI discharge-medication assistant</span>
+      </div>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/existing-patient.html">Existing Patient</a>
+      <a href="/new-patient.html" class="active">New Patient</a>
+    </nav>
+  </header>
+  <main>
+    <div class="disclaimer">
+      Manual / synthetic patient input. Runs the agent only. The synthetic auto-fill example is
+      fabricated data (see the project README) — never a real patient.
+    </div>
+
+    <div class="card">
+      <h3>Patient profile</h3>
+      <form id="new-patient-form">
+        <button type="button" id="autofill-button" class="secondary">&#8635; Auto-fill with synthetic example</button>
+
+        <div class="grid-3">
+          <div>
+            <label for="age">Age</label>
+            <input type="number" id="age" min="18" max="110" required />
+          </div>
+          <div>
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="F">F</option>
+              <option value="M">M</option>
+            </select>
+          </div>
+          <div>
+            <label for="creatinine">Most recent creatinine (mg/dL, optional)</label>
+            <input type="number" step="0.1" id="creatinine" />
+          </div>
+        </div>
+
+        <label for="admission-reason">Admission diagnosis (non-hypertension condition)</label>
+        <select id="admission-reason"></select>
+
+        <label for="hypertension-status">Hypertension status</label>
+        <select id="hypertension-status"></select>
+
+        <label for="current-medications">Current medications (select all that apply)</label>
+        <select id="current-medications" multiple size="8"></select>
+        <p class="field-hint">Constrained to the fixed medication-class vocabulary — free text is not accepted.</p>
+
+        <button type="submit" id="submit-button">Run agent</button>
+      </form>
+    </div>
+
+    <div id="status"></div>
+    <div id="result"></div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/render.js"></script>
+  <script src="/js/vocabulary.js"></script>
+  <script src="/js/new-patient.js"></script>
+</body>
+</html>

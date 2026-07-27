@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Existing Patient — CDS Prototype</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 12h4l2-7 4 14 2-7h8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <h1>Clinical Decision Support</h1>
+        <span class="tagline">AI discharge-medication assistant</span>
+      </div>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/existing-patient.html" class="active">Existing Patient</a>
+      <a href="/new-patient.html">New Patient</a>
+    </nav>
+  </header>
+  <main>
+    <div class="disclaimer">Prototype only — MIMIC-III-derived test data. Not for real clinical use.</div>
+
+    <div class="card">
+      <h3>Test-set patient</h3>
+      <label for="patient-select">Held-out admission</label>
+      <select id="patient-select"><option>Loading cohort…</option></select>
+      <button id="run-button" disabled>Run baseline / model / agent</button>
+      <div id="patient-summary"></div>
+    </div>
+
+    <div id="status"></div>
+    <div id="results" class="grid-3"></div>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/render.js"></script>
+  <script src="/js/existing-patient.js"></script>
+</body>
+</html>

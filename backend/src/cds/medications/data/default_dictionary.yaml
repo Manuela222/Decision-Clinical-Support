@@ -1,0 +1,272 @@
+# Default medication synonym + class dictionary (Phase 4).
+#
+# `synonyms` maps common brand names / abbreviations to a normalized base
+# ingredient name (post dosage/route/salt stripping, see normalize.py).
+# `classes` maps that same normalized base ingredient name to one entry in
+# the fixed medication-class vocabulary. `antihypertensive_classes` lists
+# which of those class names are treated as HTN-related for the project's
+# label-exclusion / safety-check split.
+#
+# Built from the Phase 0 feasibility audit's highest-frequency discharge
+# DRUG strings in the filtered cohort (see FEASIBILITY_REPORT.md, Section 4)
+# plus a follow-up pass over that audit's "Other/Unmapped" list to broaden
+# coverage. This is still not exhaustive — anything not listed here falls
+# back to "Other/Unmapped" in map_to_medication_class(), which is expected
+# and should keep shrinking as real gaps are found in later phases.
+
+synonyms:
+  lasix: furosemide
+  tylenol: acetaminophen
+  coumadin: warfarin
+  zocor: simvastatin
+  lopressor: metoprolol
+  glucophage: metformin
+  toprol: metoprolol
+  norvasc: amlodipine
+  prinivil: lisinopril
+  zestril: lisinopril
+  diovan: valsartan
+  cozaar: losartan
+  dw: dextrose
+  d w: dextrose
+  d5w: dextrose
+  d10w: dextrose
+  d5ns: dextrose
+  ns: sodium chloride
+  sw: sterile water
+  lr: lactated ringers
+  unasyn: ampicillin-sulbactam
+  neurontin: gabapentin
+  ultram: tramadol
+  benadryl: diphenhydramine
+  zofran: ondansetron
+  reglan: metoclopramide
+  protonix: pantoprazole
+  prilosec: omeprazole
+  zantac: ranitidine
+  pepcid: famotidine
+  ativan: lorazepam
+  versed: midazolam
+  ambien: zolpidem
+  haldol: haloperidol
+  seroquel: quetiapine
+  zyprexa: olanzapine
+  lanoxin: digoxin
+  cardizem: diltiazem
+  procardia: nifedipine
+
+classes:
+  # --- antihypertensive-tagged classes (excluded from label, kept for safety) ---
+  metoprolol: beta blocker
+  atenolol: beta blocker
+  labetalol: beta blocker
+  carvedilol: beta blocker
+  propranolol: beta blocker
+  esmolol: beta blocker
+  sotalol: beta blocker
+  furosemide: loop diuretic
+  bumetanide: loop diuretic
+  hydrochlorothiazide: thiazide diuretic
+  chlorthalidone: thiazide diuretic
+  lisinopril: ace inhibitor
+  captopril: ace inhibitor
+  enalapril: ace inhibitor
+  ramipril: ace inhibitor
+  quinapril: ace inhibitor
+  losartan: arb
+  valsartan: arb
+  amlodipine: calcium channel blocker
+  diltiazem: calcium channel blocker
+  nifedipine: calcium channel blocker
+  verapamil: calcium channel blocker
+  nicardipine: calcium channel blocker
+  nimodipine: calcium channel blocker
+  clonidine: central alpha agonist
+  hydralazine: direct vasodilator
+  nitroprusside: direct vasodilator
+
+  # --- analgesics ---
+  acetaminophen: analgesic - non-opioid
+  ibuprofen: nsaid
+  ketorolac: nsaid
+  oxycodone-acetaminophen: analgesic - opioid combination
+  morphine: analgesic - opioid
+  hydromorphone: analgesic - opioid
+  oxycodone: analgesic - opioid
+  fentanyl: analgesic - opioid
+  meperidine: analgesic - opioid
+  tramadol: analgesic - opioid
+  methadone: analgesic - opioid
+  gabapentin: anticonvulsant / neuropathic pain
+  bupivacaine: local anesthetic
+  lidocaine: local anesthetic
+
+  # --- antidiabetics ---
+  insulin: antidiabetic - insulin
+  metformin: antidiabetic - biguanide
+  glipizide: antidiabetic - sulfonylurea
+  glyburide: antidiabetic - sulfonylurea
+  pioglitazone: antidiabetic - thiazolidinedione
+  rosiglitazone: antidiabetic - thiazolidinedione
+  glucagon: antihypoglycemic agent
+
+  # --- GI ---
+  docusate: laxative / stool softener
+  bisacodyl: laxative / stool softener
+  senna: laxative / stool softener
+  "milk of magnesia": laxative / stool softener
+  lactulose: laxative / stool softener
+  golytely: laxative / stool softener
+  ranitidine: h2 blocker
+  famotidine: h2 blocker
+  pantoprazole: proton pump inhibitor
+  omeprazole: proton pump inhibitor
+  sucralfate: gi mucosal protectant
+  simethicone: gi antiflatulent
+  metoclopramide: antiemetic / prokinetic
+  ondansetron: antiemetic
+  dolasetron: antiemetic
+  prochlorperazine: antiemetic
+  promethazine: antiemetic
+
+  # --- cardiovascular (non-antihypertensive) ---
+  aspirin: antiplatelet
+  clopidogrel: antiplatelet
+  eptifibatide: antiplatelet
+  tirofiban: antiplatelet
+  warfarin: anticoagulant
+  heparin: anticoagulant
+  enoxaparin: anticoagulant
+  atorvastatin: statin
+  simvastatin: statin
+  pravastatin: statin
+  rosuvastatin: statin
+  ezetimibe: lipid-lowering - non-statin
+  amiodarone: antiarrhythmic
+  digoxin: antiarrhythmic
+  nitroglycerin: antianginal - nitrate
+  isosorbide mononitrate: antianginal - nitrate
+  isosorbide dinitrate: antianginal - nitrate
+  atropine: anticholinergic
+  protamine: heparin reversal agent
+  alteplase: thrombolytic
+  dopamine: vasopressor
+  norepinephrine: vasopressor
+  epinephrine: vasopressor
+  phenylephrine: vasopressor
+
+  # --- antibiotics / antimicrobials ---
+  vancomycin: antibiotic - glycopeptide
+  levofloxacin: antibiotic - fluoroquinolone
+  ciprofloxacin: antibiotic - fluoroquinolone
+  cefazolin: antibiotic - cephalosporin
+  ceftriaxone: antibiotic - cephalosporin
+  cefepime: antibiotic - cephalosporin
+  ceftazidime: antibiotic - cephalosporin
+  cephalexin: antibiotic - cephalosporin
+  ampicillin: antibiotic - penicillin
+  ampicillin-sulbactam: antibiotic - penicillin combination
+  piperacillin-tazobactam: antibiotic - penicillin combination
+  oxacillin: antibiotic - penicillin
+  metronidazole: antibiotic - other
+  azithromycin: antibiotic - macrolide
+  clindamycin: antibiotic - other
+  gentamicin: antibiotic - aminoglycoside
+  meropenem: antibiotic - carbapenem
+  linezolid: antibiotic - other
+  sulfamethtrimethoprim: antibiotic - other
+  fluconazole: antifungal
+  acyclovir: antiviral
+
+  # --- respiratory ---
+  albuterol: bronchodilator - beta agonist
+  ipratropium bromide: bronchodilator - anticholinergic
+  albuterol-ipratropium: bronchodilator - combination
+  fluticasone propionate: inhaled corticosteroid
+  fluticasone-salmeterol: inhaled corticosteroid combination
+  montelukast: leukotriene modifier
+  guaifenesin: expectorant
+  pseudoephedrine: decongestant
+
+  # --- corticosteroids / endocrine ---
+  prednisone: corticosteroid - systemic
+  methylprednisolone: corticosteroid - systemic
+  hydrocortisone: corticosteroid - systemic
+  dexamethasone: corticosteroid - systemic
+  levothyroxine: thyroid hormone replacement
+  fludrocortisone: mineralocorticoid
+
+  # --- neuro / psych ---
+  lorazepam: benzodiazepine
+  midazolam: benzodiazepine
+  diazepam: benzodiazepine
+  clonazepam: benzodiazepine
+  alprazolam: benzodiazepine
+  oxazepam: benzodiazepine
+  zolpidem: sedative - hypnotic
+  dexmedetomidine: sedative - anesthetic
+  propofol: sedative - anesthetic
+  haloperidol: antipsychotic
+  quetiapine: antipsychotic
+  olanzapine: antipsychotic
+  phenytoin: anticonvulsant
+  levetiracetam: anticonvulsant
+  phenobarbital: anticonvulsant
+  trazodone: antidepressant
+  citalopram: antidepressant
+  paroxetine: antidepressant
+  sertraline: antidepressant
+  fluoxetine: antidepressant
+  buspirone: anxiolytic - non-benzodiazepine
+  donepezil: cholinesterase inhibitor
+  diphenhydramine: antihistamine
+  hydroxyzine: antihistamine
+  fexofenadine: antihistamine
+
+  # --- other ---
+  folic acid: vitamin / supplement
+  thiamine: vitamin / supplement
+  "ascorbic acid": vitamin / supplement
+  cyanocobalamin: vitamin / supplement
+  "vitamin d": vitamin / supplement
+  multivitamin: vitamin / supplement
+  ferrous: iron supplement
+  calcium carbonate: calcium supplement
+  phytonadione: vitamin k / anticoagulation reversal
+  allopurinol: gout medication
+  colchicine: gout medication
+  sevelamer: phosphate binder
+  polystyrene sulfonate: potassium binder
+  tamsulosin: alpha-1 blocker
+  terazosin: alpha-1 blocker
+  cisatracurium: neuromuscular blocker
+  vecuronium bromide: neuromuscular blocker
+  glycopyrrolate: anticholinergic
+  neostigmine: cholinergic / reversal agent
+
+antihypertensive_classes:
+  - ace inhibitor
+  - arb
+  - beta blocker
+  - calcium channel blocker
+  - loop diuretic
+  - thiazide diuretic
+  - central alpha agonist
+  - direct vasodilator
+
+exclude_entirely:
+  - dextrose
+  - "sodium chloride"
+  - "sterile water"
+  - "lactated ringers"
+  - potassium
+  - chloride
+  - bicarbonate
+  - magnesium
+  - "calcium gluconate"
+  - "iso-osmotic dextrose"
+  - syringe
+  - vial
+  - albumin
+  - mannitol
+  - calcium

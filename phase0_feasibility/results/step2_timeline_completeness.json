@@ -1,0 +1,15 @@
+{
+  "n_cohort_admissions": 643,
+  "has_discharge_summary": 616,
+  "missing_discharge_summary": 27,
+  "has_any_note": 642,
+  "missing_any_note": 1,
+  "has_labs": 640,
+  "missing_labs": 3,
+  "has_prescriptions": 643,
+  "missing_prescriptions": 0,
+  "has_prior_admission": 105,
+  "no_prior_admission_first_visit": 538,
+  "fully_complete_core_fields": 615,
+  "partial_missing_something_core": 28
+}

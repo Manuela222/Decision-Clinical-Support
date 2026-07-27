@@ -1,0 +1,21 @@
+# MIMIC-III data extract -- large (multi-GB) and not redistributable.
+# Supply your own local extract under this path; see README.md.
+MIMIC_III_10k/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+*.joblib
+*.pkl
+
+# Node
+frontend/node_modules/
+
+# Editor / OS / local tool config
+.DS_Store
+.vscode/
+.idea/
+.claude/
