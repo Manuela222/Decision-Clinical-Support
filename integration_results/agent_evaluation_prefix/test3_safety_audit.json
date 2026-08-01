@@ -1,0 +1,72 @@
+{
+  "n_admissions": 116,
+  "tool_calls_per_admission": {
+    "min": 3,
+    "max": 25,
+    "mean": 9.672413793103448
+  },
+  "hypertension_checks_per_admission": {
+    "min": 2,
+    "max": 15,
+    "mean": 7.267241379310345
+  },
+  "every_recommendation_had_a_forced_hypertension_check": true,
+  "vocabulary_hallucination_rejections": [
+    {
+      "hadm_id": 145041,
+      "issue": "Rejected candidate medication_class 'opioid': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 197891,
+      "issue": "Rejected candidate medication_class 'atypical antipsychotic': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 197891,
+      "issue": "Rejected candidate medication_class 'vaccine': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 175725,
+      "issue": "Rejected candidate medication_class 'dexamethasone': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 175725,
+      "issue": "Rejected candidate medication_class 'blood glucose lowering agent': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 169054,
+      "issue": "Rejected candidate medication_class 'opioid': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 168865,
+      "issue": "Rejected candidate medication_class 'dexamethasone': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 138991,
+      "issue": "Rejected candidate medication_class 'insulin': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 101675,
+      "issue": "Rejected candidate medication_class 'antidote / reversal': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 187200,
+      "issue": "Rejected candidate medication_class 'antidote': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    }
+  ],
+  "other_flagged_events": [],
+  "n_agent_errors": 12,
+  "agent_errors": {
+    "149699": "Agent's final answer was not valid JSON (Expecting value: line 1 column 1 (char 0)): '```json\\n{\"recommendations\":[{\"medication_class\":\"antiplatelet\",\"action\":\"continue\",\"rationale\":\"Antiplatelet therapy is compatible with chronic hypertension management and is indicated for cardiovascular protection.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-9847-113969\"]},{\"medication_class\":\"anticoagulant\",\"action\":\"continue\",\"rationale\":\"Anticoagulants are safe for use in patients with chronic hypertension and may be necessary for thromboembolic prevention.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-9847-113969\"]},{\"medication_class\":\"statin\",\"action\":\"continue\",\"rationale\":\"Statins are well-tolerated in patients with chronic hypertension and provide cardiovascular benefits.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-20-157681\"]},{\"medication_class\":\"analgesic - non-opioid\",\"action\":\"continue\",\"rationale\":\"Non-opioid analgesics do not adversely affect hypertension management and can help with pain control.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-9847-113969\"]},{\"medication_class\":\"analgesic - opioid\",\"action\":\"continue\",\"rationale\":\"Opioid analgesics are compatible with chronic hypertension treatment for necessary pain management.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-5908-104067\"]},{\"medication_class\":\"analgesic - opioid combination\",\"action\":\"continue\",\"rationale\":\"Combination opioid analgesics can be safely used in patients with chronic hypertension for pain relief.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-5908-104067\"]},{\"medication_class\":\"antianginal - nitrate\",\"action\":\"continue\",\"rationale\":\"Nitrates can safely manage angina symptoms without influencing blood pressure negatively in hypertensive patients.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-9847-113969\"]},{\"medication_class\":\"proton pump inhibitor\",\"action\":\"continue\",\"rationale\":\"Proton pump inhibitors do not interfere with the management of hypertension and are effective for gastrointestinal protection.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-20-157681\"]},{\"medication_class\":\"h2 blocker\",\"action\":\"continue\",\"rationale\":\"H2 blockers are compatible with chronic hypertension therapy and assist in managing gastric acidity.\",\"confidence\":0.9,\"evidence_ids\":[\"train-profile-3282-199068\"]},{\"medication_class\":\"thiazide diuretic\",\"action\":\"avoid\",\"rationale\":\"Thiazide diuretics are antihypertensive agents and are not indicated as discharge medication in a patient already treated for hypertension.\",\"confidence\":0.8,\"evidence_ids\":[\"train-profile-20-157681\"]}]}\\n```'",
+    "139169": "ValueError: 'consider' is not a valid MedicationAction",
+    "198344": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "129192": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "166854": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "162422": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "103292": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "160939": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "122212": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "110634": "Agent's final answer was not valid JSON (Expecting value: line 1 column 1 (char 0)): '```json\\n{\"recommendations\":[{\"medication_class\":\"antianginal - nitrate\",\"action\":\"start\",\"rationale\":\"\\'antianginal - nitrate\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]},{\"medication_class\":\"analgesic - non-opioid\",\"action\":\"start\",\"rationale\":\"\\'analgesic - non-opioid\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]},{\"medication_class\":\"antibiotic - cephalosporin\",\"action\":\"start\",\"rationale\":\"\\'antibiotic - cephalosporin\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]},{\"medication_class\":\"antiplatelet\",\"action\":\"start\",\"rationale\":\"\\'antiplatelet\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]},{\"medication_class\":\"anticoagulant\",\"action\":\"start\",\"rationale\":\"\\'anticoagulant\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]},{\"medication_class\":\"proton pump inhibitor\",\"action\":\"start\",\"rationale\":\"\\'proton pump inhibitor\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]},{\"medication_class\":\"statin\",\"action\":\"start\",\"rationale\":\"\\'statin\\' is compatible with chronic hypertension management.\",\"confidence\":1.0,\"evidence_ids\":[\"train-profile-9425-126145\"]}]}\\n```'",
+    "189625": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "126141": "Agent exceeded max_tool_calls=25 without producing a final answer."
+  }
+}

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <header>
+  <header class="no-print">
     <div class="brand">
       <span class="brand-mark">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,9 +26,9 @@
     </nav>
   </header>
   <main>
-    <div class="disclaimer">Prototype only — MIMIC-III-derived test data. Not for real clinical use.</div>
+    <div class="disclaimer no-print">Prototype only — MIMIC-III-derived test data. Not for real clinical use.</div>
 
-    <div class="card">
+    <div class="card no-print">
       <h3>Test-set patient</h3>
       <label for="patient-select">Held-out admission</label>
       <select id="patient-select"><option>Loading cohort…</option></select>
@@ -37,11 +37,26 @@
     </div>
 
     <div id="status"></div>
+    <div id="comparison-summary"></div>
+    <div id="results-toolbar" class="results-toolbar no-print"></div>
     <div id="results" class="grid-3"></div>
   </main>
 
+  <div id="focus-overlay" class="focus-overlay hidden no-print">
+    <div class="focus-panel">
+      <div class="focus-toolbar">
+        <button id="focus-prev" class="icon-button" aria-label="Previous">&#8592;</button>
+        <div id="focus-title" class="focus-title"></div>
+        <button id="focus-next" class="icon-button" aria-label="Next">&#8594;</button>
+        <button id="focus-close" class="icon-button focus-close" aria-label="Close">&times;</button>
+      </div>
+      <div id="focus-body" class="focus-body"></div>
+    </div>
+  </div>
+
   <script src="/js/api.js"></script>
   <script src="/js/render.js"></script>
+  <script src="/js/focus.js"></script>
   <script src="/js/existing-patient.js"></script>
 </body>
 </html>

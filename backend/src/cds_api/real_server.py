@@ -6,6 +6,10 @@ real cohort patients, not the synthetic demo cohort.
 
 Run with: python -m cds_api.real_server
 """
+from dotenv import load_dotenv
+
+load_dotenv()  # loads backend/.env if present -- never overrides a var already set in the shell
+
 from .dependencies import set_app_state
 from .real_data import build_real_app_state
 from .routes import app

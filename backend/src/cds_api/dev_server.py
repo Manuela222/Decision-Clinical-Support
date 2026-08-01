@@ -7,6 +7,10 @@ OpenAI API calls (requires OPENAI_API_KEY in the environment).
 
 Run with: python -m cds_api.dev_server
 """
+from dotenv import load_dotenv
+
+load_dotenv()  # loads backend/.env if present -- never overrides a var already set in the shell
+
 from cds.agent import OpenAIProvider
 
 from .app_state import build_fake_app_state

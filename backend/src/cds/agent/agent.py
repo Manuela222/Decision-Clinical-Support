@@ -24,6 +24,7 @@ their (JSON-serializable) results, and the model's own final-answer content
 — never a free-form "thinking" blob.
 """
 import json
+import re
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -91,9 +92,16 @@ def _build_initial_messages(clinical_state: ClinicalState, known_classes: List[s
     ]
 
 
+_MARKDOWN_FENCE_RE = re.compile(r"^```[a-zA-Z]*\n?|\n?```$")
+
+
 def _parse_final_answer(content: str) -> List[Dict[str, Any]]:
+    # Some models wrap their JSON answer in a markdown code fence despite the
+    # system prompt asking for "ONLY a JSON object, no other text" -- observed
+    # live (Section 4.3's Test 2/3 run), not hypothetical. Strip it before parsing.
+    text = _MARKDOWN_FENCE_RE.sub("", content.strip()).strip()
     try:
-        data = json.loads(content)
+        data = json.loads(text)
     except json.JSONDecodeError as e:
         raise AgentError(f"Agent's final answer was not valid JSON ({e}): {content!r}") from e
     if not isinstance(data, dict) or not isinstance(data.get("recommendations"), list):
@@ -212,6 +220,28 @@ def recommend_agent(
             )
             continue
 
+        try:
+            action = MedicationAction(raw.get("action", "start"))
+        except ValueError:
+            # Observed live (Section 4.3's Test 2/3 run): the model can propose an
+            # action outside the fixed start/continue/stop/adjust/avoid enum (e.g.
+            # "consider") despite the system prompt listing exactly those five.
+            # Reject this one recommendation rather than letting the ValueError
+            # abort the whole admission's response.
+            step_index += 1
+            reasoning_steps.append(
+                ReasoningStep(
+                    step_index=step_index,
+                    step_type=ReasoningStepType.REASONING,
+                    description=(
+                        f"Rejected candidate medication_class '{medication_class}': action "
+                        f"'{raw.get('action')}' is not one of start/continue/stop/adjust/avoid."
+                    ),
+                    timestamp=datetime.now(timezone.utc),
+                )
+            )
+            continue
+
         if medication_class not in compatibility_checked:
             compat_result = mcp_tools.check_medication_compatibility(ctx, medication_class=medication_class)
             compat_dump = compat_result.model_dump(mode="json")
@@ -252,7 +282,7 @@ def recommend_agent(
         recommendations.append(
             MedicationRecommendation(
                 medication_class=medication_class,
-                action=MedicationAction(raw.get("action", "start")),
+                action=action,
                 rationale=raw.get("rationale", ""),
                 evidence_ids=list(raw.get("evidence_ids", [])),
                 confidence=float(raw.get("confidence", 0.5)),

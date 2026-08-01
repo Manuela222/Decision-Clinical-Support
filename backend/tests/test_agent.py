@@ -193,3 +193,58 @@ def test_reasoning_trace_has_no_hidden_fields_beyond_schema(ctx):
     # every step round-trips through JSON cleanly -- i.e. it's fully serializable, UI-displayable (XAI requirement)
     for step in result.reasoning_trace:
         json.loads(step.model_dump_json())
+
+
+# --- defensive handling of real live-model failure modes (Section 4.3) --------
+
+def test_agent_rejects_medication_class_outside_fixed_vocabulary(ctx):
+    provider = MockLLMProvider(
+        [
+            _final_answer_turn(
+                [
+                    {"medication_class": "statin", "action": "start", "rationale": "Lipid control.", "confidence": 0.5},
+                    {"medication_class": "made-up-class", "action": "start", "rationale": "Hallucinated.", "confidence": 0.9},
+                ]
+            )
+        ]
+    )
+    result = recommend_agent(ctx.clinical_state, ctx, provider)
+
+    classes = [r.medication_class for r in result.recommended_medications]
+    assert classes == ["statin"]  # the hallucinated one was dropped, not silently marked "compatible"
+    rejected_steps = [s for s in result.reasoning_trace if "made-up-class" in s.description and "not part of the fixed" in s.description]
+    assert len(rejected_steps) == 1
+
+
+def test_agent_strips_markdown_code_fence_from_final_answer(ctx):
+    # Observed live: some models wrap the JSON answer in a ```json ... ``` fence
+    # despite the system prompt asking for "ONLY a JSON object, no other text".
+    fenced_content = "```json\n" + json.dumps(
+        {"recommendations": [{"medication_class": "statin", "action": "start", "rationale": "Lipid control.", "confidence": 0.5}]}
+    ) + "\n```"
+    provider = MockLLMProvider([LLMTurn(content=fenced_content, tool_calls=[])])
+
+    result = recommend_agent(ctx.clinical_state, ctx, provider)
+
+    assert [r.medication_class for r in result.recommended_medications] == ["statin"]
+
+
+def test_agent_rejects_invalid_action_without_crashing_whole_admission(ctx):
+    # Observed live: the model can propose an action outside the fixed enum
+    # (e.g. "consider") despite the system prompt listing exactly five values.
+    provider = MockLLMProvider(
+        [
+            _final_answer_turn(
+                [
+                    {"medication_class": "statin", "action": "start", "rationale": "Lipid control.", "confidence": 0.5},
+                    {"medication_class": "nsaid", "action": "consider", "rationale": "Maybe.", "confidence": 0.4},
+                ]
+            )
+        ]
+    )
+    result = recommend_agent(ctx.clinical_state, ctx, provider)
+
+    classes = [r.medication_class for r in result.recommended_medications]
+    assert classes == ["statin"]  # the invalid-action one was dropped, the rest of the admission still succeeded
+    rejected_steps = [s for s in result.reasoning_trace if "nsaid" in s.description and "not one of start/continue/stop/adjust/avoid" in s.description]
+    assert len(rejected_steps) == 1

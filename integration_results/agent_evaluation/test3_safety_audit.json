@@ -1,0 +1,55 @@
+{
+  "n_admissions": 125,
+  "tool_calls_per_admission": {
+    "min": 4,
+    "max": 25,
+    "mean": 10.104
+  },
+  "hypertension_checks_per_admission": {
+    "min": 2,
+    "max": 20,
+    "mean": 7.712
+  },
+  "every_recommendation_had_a_forced_hypertension_check": true,
+  "vocabulary_hallucination_rejections": [
+    {
+      "hadm_id": 136944,
+      "issue": "Rejected candidate medication_class 'digoxin': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 135802,
+      "issue": "Rejected candidate medication_class 'opioid': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 139587,
+      "issue": "Rejected candidate medication_class 'opioid': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 161360,
+      "issue": "Rejected candidate medication_class 'antidepresant': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 171152,
+      "issue": "Rejected candidate medication_class 'antinauseant': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 171948,
+      "issue": "Rejected candidate medication_class 'antinauseant': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 130595,
+      "issue": "Rejected candidate medication_class 'opioid': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    },
+    {
+      "hadm_id": 197845,
+      "issue": "Rejected candidate medication_class 'theophylline': not part of the fixed medication-class vocabulary, cannot be safety-checked or recommended."
+    }
+  ],
+  "other_flagged_events": [],
+  "n_agent_errors": 3,
+  "agent_errors": {
+    "182469": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "180449": "Agent exceeded max_tool_calls=25 without producing a final answer.",
+    "191161": "Agent exceeded max_tool_calls=25 without producing a final answer."
+  }
+}

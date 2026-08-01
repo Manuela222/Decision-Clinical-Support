@@ -11,6 +11,10 @@ __pycache__/
 *.joblib
 *.pkl
 
+# Secrets -- never commit a real API key
+.env
+backend/.env
+
 # Node
 frontend/node_modules/
 

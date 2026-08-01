@@ -1,0 +1,23 @@
+[
+  {
+    "method": "baseline",
+    "n_matched_recommendations": 652,
+    "mean_confidence_when_matched": 0.5973874030945681,
+    "n_extra_recommendations": 728,
+    "mean_confidence_when_extra": 0.4893374696586774
+  },
+  {
+    "method": "trained_model",
+    "n_matched_recommendations": 710,
+    "mean_confidence_when_matched": 0.6280774647887324,
+    "n_extra_recommendations": 1803,
+    "mean_confidence_when_extra": 0.48838602329450914
+  },
+  {
+    "method": "agent",
+    "n_matched_recommendations": 363,
+    "mean_confidence_when_matched": 0.9555096418732782,
+    "n_extra_recommendations": 480,
+    "mean_confidence_when_extra": 0.9238541666666666
+  }
+]

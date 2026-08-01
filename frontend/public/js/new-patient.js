@@ -54,14 +54,39 @@ form.addEventListener("submit", async (event) => {
 
   try {
     const result = await api.predictAgentNewPatient(payload);
-    resultEl.innerHTML = `<div class="card">
-      <h3>Agent recommendation <span class="muted">(${escapeHtml(result.model_version || "")})</span></h3>
-      ${renderMedicationTable(result.recommended_medications, null)}
+    const bodyHtml = `${renderMedicationTable(result.recommended_medications, null)}
       <h4>Safety warnings</h4>
       ${renderSafetyWarnings(result.safety_warnings)}
       <h4>Reasoning trace</h4>
-      ${renderReasoningTrace(result.reasoning_trace)}
-    </div>`;
+      ${renderReasoningTrace(result.reasoning_trace)}`;
+    resultEl.innerHTML = `<div class="results-toolbar no-print">
+        <button type="button" id="copy-results-btn" class="secondary">&#128203; Copy summary</button>
+        <button type="button" id="export-pdf-btn" class="secondary">&#128196; Export / Print</button>
+        <span id="copy-flash" class="copy-flash"></span>
+      </div>
+      <div class="card">
+        <div class="card-title-row">
+          <h3>Agent recommendation <span class="muted">(${escapeHtml(result.model_version || "")})</span></h3>
+          <button type="button" class="icon-button card-expand-btn" data-expand="agent" aria-label="Expand" title="Fullscreen">&#9974;</button>
+        </div>
+        ${bodyHtml}
+      </div>`;
+
+    resultEl.querySelector("[data-expand]").addEventListener("click", () => {
+      FocusModal.open([{ title: "Agent recommendation", bodyHtml }], 0);
+    });
+    document.getElementById("copy-results-btn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(resultToPlainText("Agent recommendation", result));
+        const flash = document.getElementById("copy-flash");
+        flash.textContent = "Copied to clipboard.";
+        setTimeout(() => (flash.textContent = ""), 2500);
+      } catch (err) {
+        document.getElementById("copy-flash").textContent = "Copy failed — select and copy manually.";
+      }
+    });
+    document.getElementById("export-pdf-btn").addEventListener("click", () => window.print());
+
     statusEl.innerHTML = "";
   } catch (err) {
     statusEl.innerHTML = `<div class="error-box">${escapeHtml(err.message)}</div>`;

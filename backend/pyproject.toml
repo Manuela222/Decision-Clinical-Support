@@ -18,6 +18,7 @@ dependencies = [
     "openai>=1.50",
     "fastapi>=0.110",
     "duckdb>=0.10",
+    "python-dotenv>=1.0",
 ]
 
 [project.optional-dependencies]

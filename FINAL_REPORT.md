@@ -20,7 +20,7 @@ The full pipeline — cohort selection, medication normalization, timeline
 and clinical-state construction, the three recommenders, a shared safety
 layer, retrieval, an MCP tool server, evaluation, explainability, a FastAPI
 backend, and a Node.js frontend — was built phase by phase, each phase
-gated on the previous one, with 200 automated tests. Phase 0's feasibility
+gated on the previous one, with 203 automated tests. Phase 0's feasibility
 audit and this report's own integration run were both executed against the
 real MIMIC_III_10k extract (not just synthetic fixtures); the baseline and
 trained-model numbers in Section 4 are real, measured results on a
@@ -38,15 +38,23 @@ Agent evaluation could not initially be run against a live model in this
 environment (no `OPENAI_API_KEY` / network access) — its behavior was
 first verified through 10 orchestration-logic tests against a scripted
 mock provider and a live browser walkthrough of the actual UI (Phase 17).
-Live OpenAI connectivity was established afterward and used for ad hoc
-testing, which surfaced and led to fixing two real defects invisible to
-the mock — an undersized tool-call budget and, more seriously, the agent
-proposing medication-class names outside the fixed vocabulary in a way
-that silently bypassed the hypertension safety check (Section 4.2). A full
-quantitative agent evaluation against the 128-admission test split — the
-agent's own row in Section 4.1's table — has still not been run, given its
-real API cost; this remains a genuine, explicit gap, treated as one in
-Section 7.
+Live OpenAI connectivity was established afterward. Ad hoc testing
+surfaced and led to fixing two real defects invisible to the mock — an
+undersized tool-call budget and, more seriously, the agent proposing
+medication-class names outside the fixed vocabulary in a way that could
+have silently bypassed the hypertension safety check (Section 4.2). A
+subsequent full evaluation run across the real 128-admission test split
+(Section 4.3) surfaced **two more** real defects the same way (a
+markdown-fenced JSON answer, and an out-of-enum action crashing an entire
+admission's response) — both fixed and confirmed by a second run, which
+succeeded on 125/128 admissions (97.7%). With the agent's row filled in:
+it ties the trained model on micro F1 but has the **best macro F1 of all
+three methods** (0.202), while the baseline still wins on micro F1. A
+Section 4.3 confidence-calibration test also found that, unlike baseline
+and the trained model, the agent's self-reported confidence barely
+distinguishes correct from incorrect recommendations — a real,
+quantified caveat for anyone tempted to read its confidence score at
+face value.
 
 ---
 
@@ -264,7 +272,7 @@ re-verified before moving on.
 
 ### 2.18 Test suite
 
-200 `pytest` tests (`backend/tests/`, one file per phase), run entirely
+203 `pytest` tests (`backend/tests/`, one file per phase), run entirely
 against fake or synthetic fixtures — no test ever touches real MIMIC-III
 data or makes a live network call. Two patterns make this possible for the
 otherwise-hardest-to-test parts of the system: `MockLLMProvider` (a
@@ -273,12 +281,18 @@ every agent-orchestration test in `test_agent.py`, decoupling the tool-call
 loop, the forced hypertension-compatibility guarantee, and error handling
 from any specific model's language behavior; and `build_fake_app_state()`
 builds a small synthetic `AppState` for every FastAPI route test in
-`test_api.py`, injected via `app.dependency_overrides`. One test,
-`test_predict_agent_exceeding_tool_call_budget_returns_502`, was added
-directly in response to a live-testing finding (Section 4.2): an
-unhandled `AgentError` used to bubble up as an opaque 500 with no JSON
-body (browsers report this as an unhelpful "Failed to fetch"); it now
-asserts the route maps it to a clean 502 with a readable `detail` message.
+`test_api.py`, injected via `app.dependency_overrides`. Four tests were
+added directly in response to live-testing findings rather than written
+speculatively: `test_predict_agent_exceeding_tool_call_budget_returns_502`
+(Section 4.2 — an unhandled `AgentError` used to bubble up as an opaque
+500 with no JSON body, which browsers report as an unhelpful "Failed to
+fetch"); and three more from Section 4.3's full evaluation run —
+`test_agent_rejects_medication_class_outside_fixed_vocabulary`,
+`test_agent_strips_markdown_code_fence_from_final_answer`, and
+`test_agent_rejects_invalid_action_without_crashing_whole_admission` — each
+reproducing a real failure mode the live 128-admission run surfaced
+against a scripted `MockLLMProvider`, so it stays caught by `pytest` going
+forward rather than only by that one script.
 
 ---
 
@@ -379,7 +393,7 @@ robust") — the number confirms the caveat, not just a bare disclaimer.
 Scaling to full MIMIC-III (Phase 0 extrapolated ~4-5x more qualifying
 admissions) is the most direct lever to test whether this ordering holds.
 
-### 4.2 Agent — live connectivity confirmed, two real defects found and fixed, quantitative comparison still pending
+### 4.2 Agent — live connectivity confirmed, two real defects found and fixed via ad hoc testing
 
 At report-writing time, no `OPENAI_API_KEY` or network access was
 available, so the agent could only be verified via:
@@ -442,16 +456,158 @@ verdict. Re-tested against the live API afterward across multiple runs:
 every proposed class matched the fixed vocabulary exactly, with no
 rejections triggered.
 
-What has *not* changed: no batch run of `evaluate_all_methods(...,
-include_agent=True)` across the full 128-admission test split has been
-performed — each admission needs several real, billed API calls — so
-**the agent still has no row in the Section 4.1 comparison table**, only
-ad hoc single-patient live testing. Running that comparison is now
-mechanically straightforward (`cds_api.real_server` +
-`POST /evaluate {"include_agent": true}`, Section 5.4) but was not
-executed as part of this report given the real API cost of ~128
-admissions' worth of tool-calling agent runs; it remains an explicit,
-consent-gated next step (Section 7).
+**Update:** the batch run described as a future step above has since been
+performed. Section 4.3 reports it in full — four separate tests, two more
+real bugs it surfaced and their fixes, and the agent's completed row in
+the three-way comparison.
+
+---
+
+### 4.3 Full agent evaluation: four tests against the real 128-admission test split
+
+Run via `backend/scripts/run_agent_evaluation.py` (real `OPENAI_API_KEY`,
+`gpt-4o-mini`, the same real MIMIC_III_10k cohort and 128-admission test
+split as Section 4.1 — built with the identical `build_real_app_state()`
+used by `cds_api.real_server`). Four tests, run in sequence, each feeding
+the next:
+
+**Test 1 — smoke test (8 admissions).** A small pre-flight batch, run
+before committing to the full test split's API cost, specifically to fail
+fast if something was structurally broken. Result: 8/8 succeeded. This
+gated whether the full run below was worth running at all.
+
+**Tests 2-4 — full run, 128 admissions, in one pass.** The script runs
+baseline, trained model, and agent over every test-set admission in one
+sweep, so Test 2 (accuracy), Test 3 (safety audit), and Test 4 (confidence
+calibration) all come from the same run rather than three separate,
+possibly-inconsistent samples. Total wall-clock time for the agent portion
+across 128 admissions: ~22 minutes (dominated by sequential API round
+trips, not computation) — inexpensive at `gpt-4o-mini` pricing, but not
+instant, which is itself a real deployment-relevant data point.
+
+#### Two more real bugs found by this run, fixed, and confirmed by a second run
+
+The **first** full run succeeded on 116/128 admissions (12 failures,
+9.4%). Breaking down those 12 failures surfaced two defects that had never
+appeared in any prior mocked test or ad hoc single-patient live test:
+
+- **9 of 12**: `max_tool_calls=25` exceeded — consistent with Section
+  4.2's finding, now with a real base rate attached (~7% of admissions).
+- **2 of 12**: `AgentError: Agent's final answer was not valid JSON`. The
+  model had wrapped its JSON answer in a ```` ```json ... ``` ```` markdown
+  code fence — despite the system prompt's explicit "respond with ONLY a
+  JSON object, no other text" — which `json.loads` cannot parse as-is.
+- **1 of 12**: `ValueError: 'consider' is not a valid MedicationAction`.
+  The model proposed an action outside the fixed
+  `start|continue|stop|adjust|avoid` enum the system prompt lists, and the
+  code called `MedicationAction(raw.get("action"))` directly with no
+  validation — an unhandled `ValueError` that crashed the *entire*
+  admission's response, discarding every other, valid recommendation in
+  the same answer.
+
+Both are now fixed in `cds/agent/agent.py`, following the same principle
+Section 4.2 already established for hallucinated medication classes —
+validate the model's output before trusting it, and fail one recommendation
+rather than one entire admission:
+
+1. `_parse_final_answer` now strips a leading/trailing markdown code fence
+   before calling `json.loads`.
+2. Parsing `action` is now wrapped in a `try/except ValueError`; an invalid
+   action rejects *that one* candidate recommendation (logged as a
+   `REASONING` step, same pattern as the vocabulary rejection) instead of
+   raising and losing the whole admission's answer.
+
+Three new tests were added (`test_agent.py`, 203 tests total) reproducing
+each failure mode against `MockLLMProvider` so they stay caught by
+`pytest` going forward, not just by this one script.
+
+The **second** full run, with both fixes applied, succeeded on **125/128
+admissions (97.7%)** — all three remaining failures are budget-exceeded,
+**zero** malformed-JSON or invalid-action failures. All results below are
+from this second, post-fix run.
+
+#### Test 2: the agent's completed row in the three-way comparison
+
+Scored over the 125 admissions where all three methods have a result
+(the 3 that still exceeded the tool-call budget are excluded from *all
+three* columns here, not just the agent's, so the comparison stays
+apples-to-apples — see `test2_full_comparison.csv`):
+
+| Method | n evaluated | Micro P | Micro R | Micro F1 | Macro P | Macro R | Macro F1 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Baseline | 125 | 0.478 | 0.638 | **0.546** | 0.181 | 0.231 | 0.185 |
+| Trained model | 125 | 0.284 | 0.692 | 0.403 | 0.128 | 0.357 | 0.166 |
+| Agent | 125 | 0.432 | 0.374 | 0.401 | **0.270** | 0.219 | **0.202** |
+
+**Conclusion:** the baseline still wins on micro F1, matching Section
+4.1's finding on this slightly reduced (125 vs. 128) admission set — this
+was not an artifact of the agent being absent. The agent essentially ties
+the trained model on micro F1 (0.401 vs. 0.403) but gets there completely
+differently: far lower recall (0.374, the most conservative of the three
+— it recommends fewer classes per admission) but the **best macro
+precision and macro F1 of all three methods** (0.270 / 0.202). Read
+together with the rare-class discussion in Section 6.4, this is a
+genuinely interesting, non-obvious result: the agent is comparatively
+*better* at the classes with little training signal — plausible, since it
+reasons per-patient from retrieved similar cases rather than reproducing
+whatever was statistically most common — while baseline and the trained
+model both lean on frequency and therefore dominate the common classes
+(hence their much higher recall). No method wins outright; each wins on a
+different axis, which is a more honest and more useful takeaway than a
+single ranked list.
+
+#### Test 3: agent safety and consistency audit (same run)
+
+- **Hypertension-compatibility check coverage: 100%** (125/125 admissions)
+  — every single recommended medication class had a forced or
+  agent-initiated compatibility check in its reasoning trace, no
+  exceptions. The structural guarantee described in Section 2.13 held at
+  scale, not just in the hand-picked cases tested earlier.
+- **Tool calls per admission:** min 4, max 25 (the budget ceiling), mean
+  10.1. **Hypertension checks per admission:** min 2, max 20, mean 7.7.
+- **Vocabulary-hallucination backstop: triggered 8 times across the 128
+  admissions (~6%), caught 8/8.** Real rejected classes included
+  `digoxin`, `opioid` (3 separate admissions), `antidepresant` (a
+  misspelling of a real class), `antinauseant` (2 admissions), and
+  `theophylline` — plausible-sounding clinical terms, none of them exact
+  matches to the fixed 77-class vocabulary. Every one was rejected before
+  reaching the output, per `test3_safety_audit.json`; zero leaked through
+  with a fabricated "compatible" verdict.
+- **Residual budget failures: 3/128 (2.3%).** These fail *loud*: `AgentError`
+  → the route's `except AgentError` handler (Section 2.18) → a clean 502,
+  not a silently wrong or missing answer. The system's behavior when it
+  cannot safely answer is to say so, not guess.
+
+**Conclusion:** the two-layer defense from Section 4.2 (constrained prompt
++ hard backend validation) is not just a single-case fix — at real scale,
+across 128 real admissions, it caught every hallucination attempt with no
+exceptions. The remaining failure mode (budget) is a availability/UX
+problem (the admission gets no answer), not a safety problem (it never
+produces a *wrong* answer silently).
+
+#### Test 4: confidence calibration — does "confidence" actually track correctness?
+
+For each method, mean self-reported `confidence` split by whether the
+recommendation was actually correct (matched the true discharge
+medications) or not (extra) — see `test4_confidence_calibration.json`:
+
+| Method | Mean confidence — matched | Mean confidence — extra | Gap |
+|---|---:|---:|---:|
+| Baseline | 0.596 | 0.489 | 0.107 |
+| Trained model | 0.628 | 0.488 | 0.140 |
+| Agent | 0.949 | 0.938 | 0.011 |
+
+**Conclusion:** this is an empirical, quantified confirmation of Section
+5.1's conceptual claim, not just a caveat. Baseline and trained-model
+confidence both carry real discriminative signal — a correct
+recommendation scores meaningfully higher, on average, than an incorrect
+one (gaps of 0.107 and 0.140). The agent's self-reported confidence
+carries almost none: 0.949 vs. 0.938 is barely distinguishable, and both
+numbers sit near the ceiling regardless of whether the recommendation was
+actually right. A clinician who reads the agent's "94% confident" as
+comparable to the trained model's "94% confident" would be making a
+real error — the two numbers are not measuring the same thing, and only
+one of them tracks whether the system was actually correct.
 
 ---
 
@@ -649,7 +805,10 @@ recommendation — never the recommendation alone.
   in this project of why an LLM's free-text output can never be trusted as
   the sole gate on a safety-relevant field — a lesson the design in Section
   2.13 already applied to `hypertension_compatible` itself, and one this
-  incident shows extends to *which class is even being checked*.
+  incident shows extends to *which class is even being checked*. Section
+  4.3's Test 3 confirms this held at scale, not just in the one case that
+  found it: across the full 128-admission test split, the backstop
+  triggered 8 more times and caught every one, with zero leaks.
 
 ### 6.4 Limitations of the evaluation given cohort size
 
@@ -673,8 +832,12 @@ Concretely:
   as "this specific model, trained on this specific small cohort, did not
   clear the bar this specific baseline set," which is a narrower and more
   defensible claim.
-- None of the above numbers extrapolate to the agent, which was not
-  evaluated at all (Section 4.2).
+- The agent's Section 4.3 numbers rest on an even smaller effective sample
+  (125 admissions, after excluding the 3 that exceeded the tool-call
+  budget) than baseline/trained model's 128 — the same small-sample
+  caveats above apply to it at least as strongly, and its 2.3% no-answer
+  rate is itself a sample-size-sensitive number worth re-checking at
+  scale.
 
 This is a prototype demonstrating a complete, safety-conscious pipeline
 architecture — not a validated clinical tool, and not a benchmark result
@@ -684,13 +847,13 @@ that should inform real prescribing decisions at any scale evaluated here.
 
 ## 7. Known gaps and recommended next steps
 
-1. Run `evaluate_all_methods(..., include_agent=True)` (via
-   `cds_api.real_server` + `POST /evaluate`) on the same 128-admission
-   test split, to get the agent's actual row in the Section 4.1 comparison
-   table. Live connectivity and the two fixes in Section 4.2 make this
-   mechanically ready to run; it has not been run yet because it costs
-   real, billed API calls across ~128 admissions and needs explicit
-   go-ahead before spending them.
+1. ~~Run the agent across the full 128-admission test split~~ — done
+   (Section 4.3). Remaining follow-up: re-attempt the 3 admissions that
+   still exceeded the tool-call budget (possibly with a higher budget or a
+   retry-with-fresh-context strategy) to get true 128/128 coverage instead
+   of 125/128; and re-run periodically as a regression check, since
+   `gpt-4o-mini`'s behavior is not guaranteed stable across OpenAI model
+   updates the way the deterministic baseline/trained model are.
 2. Revalidate the Elixhauser mapping (`cds/cohort/elixhauser.py`) against
    a maintained reference implementation (e.g. the R `comorbidity`
    package) before treating cohort membership as ground truth.

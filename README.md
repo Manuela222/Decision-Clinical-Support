@@ -68,18 +68,25 @@ source .venv/bin/activate
 cd backend && python -m pytest
 ```
 
-200 tests, all against fake or synthetic fixtures — no MIMIC-III data or
+203 tests, all against fake or synthetic fixtures — no MIMIC-III data or
 live network/API calls required (see `FINAL_REPORT.md` Section 2.18).
 
 ## Using the OpenAI agent
 
 The agent method (`cds.agent`) calls the real OpenAI API and needs an API
-key. It is never hardcoded — set it as an environment variable before
-starting the backend:
+key. It is never hardcoded — provide it either as a shell environment
+variable, or via a `.env` file (whichever is more convenient; both are
+read by `cds_api.dev_server`/`cds_api.real_server` via `python-dotenv`, a
+shell-exported value always wins if both are set):
 
 ```bash
+# Option A: shell env var (this session only)
 export OPENAI_API_KEY="sk-..."
 export OPENAI_MODEL="gpt-4o-mini"   # optional, this is the default
+
+# Option B: .env file (persists across sessions, gitignored)
+cp backend/.env.example backend/.env
+# then edit backend/.env and paste your real key in
 ```
 
 Without a key, everything else still works — the baseline and trained
@@ -133,6 +140,12 @@ split.
 `backend/scripts/run_integration.py` is the one-off script that produced
 `integration_results/` — baseline vs. trained model on the real
 128-admission test split (no agent, no API cost).
+`backend/scripts/run_agent_evaluation.py` is the equivalent for the agent
+(`python scripts/run_agent_evaluation.py --smoke-only` for a cheap
+8-admission sanity check first, no flags for the full 128-admission run) —
+results land in `integration_results/agent_evaluation/`; see
+`FINAL_REPORT.md` Section 4.3 for the four tests it runs and their
+conclusions.
 
 ## Synthetic data — read before using any "New Patient" / demo data
 
